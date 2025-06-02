@@ -1,0 +1,90 @@
+scalar Date
+
+enum UserRole {
+    ADMIN
+    PROFESSOR
+    STUDENT
+}
+
+type User {
+    id: ID!
+    name: String
+    email: String!
+    affiliatedSchool: String!
+    role: UserRole!
+}
+
+type Group {
+    id: ID!
+    name: String!
+    availableForProjects: Boolean!
+    coordinator: User!
+    students: [User!]
+    # Se quiser expor projetos de um grupo:
+    # projects: [Project!]
+}
+
+enum ProjectStatus {
+    PENDING_ANALYSIS
+    UNDER_ANALYSIS
+    REJECTED
+    IN_PROGRESS
+    FINISHED
+}
+
+type Project {
+    id: ID!
+    name: String!
+    objective: String!
+    summaryScope: String!
+    targetAudience: String!
+    expectedStartDate: Date!
+    status: ProjectStatus!
+    requester: User!
+    group: Group
+}
+
+# --- Inputs para Mutations (espelham os inputs dos microsserviços) ---
+input CreateUserInput {
+    name: String!
+    email: String!
+    affiliatedSchool: String!
+    role: UserRole!
+}
+
+input CreateGroupInput {
+    name: String!
+    availableForProjects: Boolean!
+    coordinatorId: ID! # Passamos o ID
+    studentIds: [ID!]
+}
+
+input CreateProjectInput {
+    name: String!
+    objective: String!
+    summaryScope: String!
+    targetAudience: String!
+    expectedStartDate: Date!
+    status: ProjectStatus = PENDING_ANALYSIS
+    requesterId: ID!
+    groupId: ID
+}
+
+type Query {
+    userById(id: ID!): User
+    userByEmail(email: String!): User
+    allUsers: [User]
+
+    groupById(id: ID!): Group
+    allGroups: [Group]
+
+    projectById(id: ID!): Project
+    allProjects: [Project]
+}
+
+type Mutation {
+    createUser(input: CreateUserInput!): User
+    createGroup(input: CreateGroupInput!): Group
+    createProject(input: CreateProjectInput!): Project
+    # Adicione outras mutações conforme necessário (update, delete)
+}
