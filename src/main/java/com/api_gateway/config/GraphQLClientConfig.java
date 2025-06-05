@@ -122,34 +122,35 @@ public class GraphQLClientConfig {
                     private final DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE;
 
                     @Override
-                    public String serialize(Object dataFetcherResult, GraphQLContext context, Locale locale) throws CoercingSerializeException {
+                    public String serialize(Object dataFetcherResult) throws CoercingSerializeException {
                         if (dataFetcherResult instanceof LocalDate) {
                             return ((LocalDate) dataFetcherResult).format(formatter);
                         }
-                        throw new CoercingSerializeException("Data inválida para serialização: " + dataFetcherResult.getClass().getName());
+                        throw new CoercingSerializeException("Esperado um LocalDate para serialização");
                     }
 
                     @Override
-                    public LocalDate parseValue(Object input, GraphQLContext context, Locale locale) throws CoercingParseValueException {
-                        try {
-                            if (input instanceof String) {
+                    public LocalDate parseValue(Object input) throws CoercingParseValueException {
+                        if (input instanceof String) {
+                            try {
                                 return LocalDate.parse((String) input, formatter);
+                            } catch (DateTimeParseException e) {
+                                throw new CoercingParseValueException("Erro ao converter valor para LocalDate");
                             }
-                            throw new CoercingParseValueException("Formato de valor inválido para LocalDate: " + input.getClass().getName());
-                        } catch (DateTimeParseException e) {
-                            throw new CoercingParseValueException("Erro ao fazer parse do valor para LocalDate", e);
                         }
+                        throw new CoercingParseValueException("Esperado uma String para parseValue");
                     }
 
-                    public LocalDate parseLiteral(Value input, CoercedVariables variables, GraphQLContext context, Locale locale) throws CoercingParseLiteralException {
+                    @Override
+                    public LocalDate parseLiteral(Object input) throws CoercingParseLiteralException {
                         if (input instanceof StringValue) {
                             try {
                                 return LocalDate.parse(((StringValue) input).getValue(), formatter);
                             } catch (DateTimeParseException e) {
-                                throw new CoercingParseLiteralException("Erro ao converter literal para LocalDate", e);
+                                throw new CoercingParseLiteralException("Erro ao converter literal para LocalDate");
                             }
                         }
-                        throw new CoercingParseLiteralException("Valor literal inválido para data");
+                        throw new CoercingParseLiteralException("Esperado StringValue para parseLiteral");
                     }
                 })
                 .build();

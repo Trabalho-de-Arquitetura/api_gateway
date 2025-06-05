@@ -41,8 +41,8 @@ type ProjectDTO {
     targetAudience: String
     expectedStartDate: Date
     status: ProjectStatus
-    requester: UserDTO
-    group: GroupDTO
+    requesterId: UserDTO
+    groupId: GroupDTO
 }
 
 # --- Inputs para Mutations (espelham os inputs dos microsserviços) ---
@@ -101,7 +101,8 @@ type Query {
     findAllGroupsByStudentId(student_id: ID!): [GroupDTO!]
     findAllGroups: [GroupDTO]
 
-    projectById(id: ID!): ProjectDTO
+    projectById(id: ID!): ProjectDTO!
+    findAllProjectsByRequester(requester_id: ID!): [ProjectDTO!]!
     findAllProjects: [ProjectDTO!]
 }
 
@@ -114,6 +115,6 @@ type Mutation {
     updateGroup(input: UpdateGroupInput!): GroupDTO!
     deleteGroup(id: ID!): GroupDTO!
 
-    createProject(input: CreateProjectInput!): ProjectDTO!
+    saveProject(input: CreateProjectInput!): ProjectDTO
     # Adicione outras mutações conforme necessário (update, delete)
 }

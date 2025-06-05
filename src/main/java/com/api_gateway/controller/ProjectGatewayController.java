@@ -57,10 +57,10 @@ public class ProjectGatewayController {
     }
 
     @QueryMapping
-    public Flux<Project> allProjects() {
+    public Flux<Project> findAllProjectsByRequester(@Argument UUID requester_id) {
         String document = """
-                query AllProjects {
-                    allProjects {
+                query findAllProjectsByRequester($requester_id: ID!){
+                    findAllProjectsByRequester(requester_id: $requester_id) {
                         id
                         name
                         objective
@@ -68,18 +68,42 @@ public class ProjectGatewayController {
                         targetAudience
                         expectedStartDate
                         status
-                        requester { id }
-                        group { id }
+                        requesterId { id }
+                        groupId { id }
                     }
                 }
             """;
         return projectsClient.document(document)
-                .retrieve("allProjects")
+                .variable("requester_id", requester_id)
+                .retrieve("findAllProjectsByRequester")
                 .toEntityList(Project.class)
                 .flatMapMany(Flux::fromIterable);
     }
 
-    @SchemaMapping(typeName = "Project", field = "requester")
+    @QueryMapping
+    public Flux<Project> findAllProjects() {
+        String document = """
+                query FindAllProjects {
+                    findAllProjects {
+                        id
+                        name
+                        objective
+                        summaryScope
+                        targetAudience
+                        expectedStartDate
+                        status
+                        requesterId { id }
+                        groupId { id }
+                    }
+                }
+            """;
+        return projectsClient.document(document)
+                .retrieve("findAllProjects")
+                .toEntityList(Project.class)
+                .flatMapMany(Flux::fromIterable);
+    }
+
+    @SchemaMapping(typeName = "ProjectDTO", field = "requesterId")
     public Mono<User> getRequester(Project project) {
         if (project.getRequesterId() == null || project.getRequesterId().getId() == null) {
             return Mono.empty();
@@ -87,19 +111,24 @@ public class ProjectGatewayController {
         UUID requesterId = project.getRequesterId().getId();
 
         String userDocument = """
-            query UserById($userId: ID!) {
-                userById(id: $userId) {
-                    id name email affiliatedSchool role
+            query FindUserById($id: ID!) {
+                findUserById(id: $id) {
+                    id
+                    name
+                    email
+                    password
+                    affiliatedSchool
+                    role
                 }
             }
         """;
         return usersClient.document(userDocument)
-                .variable("userId", requesterId)
-                .retrieve("userById")
+                .variable("id", requesterId)
+                .retrieve("findUserById")
                 .toEntity(User.class);
     }
 
-    @SchemaMapping(typeName = "Project", field = "group")
+    @SchemaMapping(typeName = "ProjectDTO", field = "groupId")
     public Mono<Group> getGroup(Project project) {
         if (project.getGroupId() == null || project.getGroupId().getId() == null) {
             return Mono.empty();
@@ -124,10 +153,10 @@ public class ProjectGatewayController {
     }
 
     @MutationMapping
-    public Mono<Project> createProject(@Argument CreateProjectInput input) {
+    public Mono<Project> saveProject(@Argument CreateProjectInput input) {
         String document = """
-            mutation CreateProject($input: CreateProjectInput!) {
-                createProject(input: $input!) {
+            mutation SaveProject($input: CreateProjectInput!) {
+                saveProject(input: $input!) {
                     id
                     name
                     objective
@@ -135,14 +164,14 @@ public class ProjectGatewayController {
                     targetAudience
                     expectedStartDate
                     status
-                    requester { id }
-                    group { id }
+                    requesterId { id }
+                    groupId { id }
                 }
             }
         """;
         return projectsClient.document(document)
                 .variable("input", input)
-                .retrieve("createProject")
+                .retrieve("saveProject")
                 .toEntity(Project.class);
     }
 }
