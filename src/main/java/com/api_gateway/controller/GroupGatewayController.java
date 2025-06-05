@@ -32,39 +32,114 @@ public class GroupGatewayController {
     }
 
     @QueryMapping
-    public Mono<Group> groupById(@Argument UUID id) {
-        // Note que esta query ao groups-service só pede IDs para coordinator e students
-        // Os objetos completos User serão resolvidos pelos @SchemaMapping abaixo.
+    public Flux<Group> findAllGroupsById(@Argument List<UUID> id) {
         String document = """
-            query GroupById($id: ID!) {
-                groupById(id: $id) {
+            query FindAllGroupsById($id: [ID!]!) {
+                findAllGroupsById(id: $id) {
                     id
                     name
                     availableForProjects
-                    coordinator { id }
-                    students { id }
+                    coordinator {
+                        id
+                    }
+                    students {
+                        id
+                    }
                 }
             }
         """;
         return groupsClient.document(document)
                 .variable("id", id)
-                .retrieve("groupById")
-                .toEntity(Group.class);
+                .retrieve("findAllGroupsById")
+                .toEntityList(Group.class)
+                .flatMapMany(Flux::fromIterable);
+    }
+
+    @QueryMapping
+    public Flux<Group> findAllGroupsByNameIn(@Argument List<String> names) {
+        String document = """
+            query findAllGroupsByNameIn($names: [String!]!) {
+                findAllGroupsByNameIn(names: $names) {
+                    id
+                    name
+                    availableForProjects
+                    coordinator {
+                        id
+                    }
+                    students {
+                        id
+                    }
+                }
+            }
+        """;
+        return groupsClient.document(document)
+                .variable("names", names)
+                .retrieve("findAllGroupsByNameIn")
+                .toEntityList(Group.class)
+                .flatMapMany(Flux::fromIterable);
+    }
+
+    @QueryMapping
+    public Flux<Group> findAllGroupByCoordinator(@Argument UUID coordinator_id) {
+        String document = """
+            query FindAllGroupByCoordinator($coordinator_id: ID!) {
+                findAllGroupByCoordinator(coordinator_id: $coordinator_id) {
+                    id
+                    name
+                    availableForProjects
+                    coordinator {
+                        id
+                    }
+                    students {
+                        id
+                    }
+                }
+            }
+        """;
+        return groupsClient.document(document)
+                .variable("coordinator_id", coordinator_id)
+                .retrieve("findAllGroupByCoordinator")
+                .toEntityList(Group.class)
+                .flatMapMany(Flux::fromIterable);
+    }
+
+    @QueryMapping
+    public Flux<Group> findAllGroupsByStudentId(@Argument UUID student_id) {
+        String document = """
+            query FindAllGroupsByStudentId($student_id: ID!) {
+                findAllGroupsByStudentId(student_id: $student_id) {
+                    id
+                    name
+                    availableForProjects
+                    coordinator {
+                        id
+                    }
+                    students {
+                        id
+                    }
+                }
+            }
+        """;
+        return groupsClient.document(document)
+                .variable("student_id", student_id)
+                .retrieve("findAllGroupsByStudentId")
+                .toEntityList(Group.class)
+                .flatMapMany(Flux::fromIterable);
     }
 
     @QueryMapping
     public Flux<Group> findAllGroups() {
         String document = """
-            query AllGroups {
+            query FindAllGroups {
                 findAllGroups {
                     id
                     name
                     availableForProjects
                     coordinator {
-                      id
+                        id
                     }
                     students {
-                      id
+                        id
                     }
                 }
             }
@@ -75,69 +150,64 @@ public class GroupGatewayController {
                 .flatMapMany(Flux::fromIterable);
     }
 
-
-    // Resolver para o campo 'coordinator' do tipo 'Group'
-    @SchemaMapping(typeName = "Group", field = "coordinator")
+    @SchemaMapping(typeName = "GroupDTO", field = "coordinator")
     public Mono<User> getCoordinator(Group group) {
-        // 'group' é o objeto retornado pela query principal ao groups-service.
-        // Ele deve ter o ID do coordenador (group.getCoordinator().getId()).
-        if (group.getCoordinatorId() == null || group.getCoordinatorId().getId() == null) {
-            return Mono.empty(); // Ou lançar erro se coordenador for obrigatório
+        if (group.getCoordinator() == null || group.getCoordinator().getId() == null) {
+            return Mono.empty();
         }
-        UUID coordinatorId = group.getCoordinatorId().getId();
+
+        UUID coordinatorId = group.getCoordinator().getId();
 
         String userDocument = """
-            query UserById($id: ID!) {
-                userById(id: $id) {
-                    id
-                    name
-                    email
-                    affiliatedSchool
-                    role
-                }
+        query FindUserById($id: ID!) {
+            findUserById(id: $id) {
+                id
+                name
+                email
+                password
+                affiliatedSchool
+                role
             }
-        """;
+        }
+    """;
+
         return usersClient.document(userDocument)
                 .variable("id", coordinatorId)
-                .retrieve("userById")
+                .retrieve("findUserById")
                 .toEntity(User.class);
     }
 
-    // Resolver para o campo 'students' do tipo 'Group'
-    @SchemaMapping(typeName = "Group", field = "students")
+    @SchemaMapping(typeName = "GroupDTO", field = "students")
     public Flux<User> getStudents(Group group) {
-        if (group.getStudentIds() == null || group.getStudentIds().isEmpty()) {
+        if (group.getStudents() == null || group.getStudents().isEmpty()) {
             return Flux.empty();
         }
-        List<UUID> studentIds = group.getStudentIds().stream()
-                .map(User::getId) // Assumindo que User stub tem getId()
-                .collect(Collectors.toList());
 
-        if (studentIds.isEmpty()) return Flux.empty();
-
-        return Flux.fromIterable(studentIds)
-                .flatMap(studentId -> {
+        return Flux.fromIterable(group.getStudents())
+                .filter(student -> student != null && student.getId() != null)
+                .flatMap(student -> {
                     String userDocument = """
-                    query UserById($id: ID!) {
-                        userById(id: $id) {
+                    query FindUserById($id: ID!) {
+                        findUserById(id: $id) {
                             id
                             name
                             email
+                            password
                             affiliatedSchool
                             role
                         }
                     }
                 """;
+
                     return usersClient.document(userDocument)
-                            .variable("id", studentId)
-                            .retrieve("userById")
+                            .variable("id", student.getId())
+                            .retrieve("findUserById")
                             .toEntity(User.class);
                 });
-        // Se o users-service suportar uma query como "usersByIds(ids: [ID!]): [User]" seria melhor.
     }
 
     @MutationMapping
-    public Mono<Group> createGroup(@Argument CreateGroupInput input) {
+    public Mono<Group> saveGroup(@Argument CreateGroupInput input) {
         String document = """
             mutation SaveGroup($input: CreateGroupInput!) {
                 saveGroup(input: $input) {

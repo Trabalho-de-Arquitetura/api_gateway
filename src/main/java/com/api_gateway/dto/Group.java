@@ -8,16 +8,16 @@ public class Group {
     private UUID id;
     private String name;
     private boolean availableForProjects;
-    private User coordinatorId; // Armazena o ID do User coordenador
-    private List<User> studentIds;
+    private User coordinator; // Armazena o ID do User coordenador
+    private List<User> students;
 
     public Group() {}
-    public Group(UUID id, String name, boolean availableForProjects, User coordinatorId, List<User> studentIds) {
+    public Group(UUID id, String name, boolean availableForProjects, User coordinator, List<User> students) {
         this.id = id;
         this.name = name;
         this.availableForProjects = availableForProjects;
-        this.coordinatorId = coordinatorId;
-        this.studentIds = studentIds;
+        this.coordinator = coordinator;
+        this.students = students;
     }
 
     public UUID getId() {
@@ -44,19 +44,19 @@ public class Group {
         this.availableForProjects = availableForProjects;
     }
 
-    public User getCoordinatorId() {
-        return coordinatorId;
+    public User getCoordinator() {
+        return coordinator;
     }
 
-    public void setCoordinatorId(User coordinatorId) {
-        this.coordinatorId = coordinatorId;
+    public void setCoordinator(User coordinatorId) {
+        this.coordinator = coordinatorId;
     }
 
-    public List<User> getStudentIds() {
-        return studentIds;
+    public List<User> getStudents() {
+        return students;
     }
 
-    public void setStudentIds(List<User> studentIds) {
-        this.studentIds = studentIds;
+    public void setStudents(List<User> students) {
+        this.students = students;
     }
 }

@@ -65,7 +65,7 @@ input UpdateUserInput {
 input CreateGroupInput {
     name: String!
     availableForProjects: Boolean!
-    coordinatorId: ID! # Passamos o ID
+    coordinatorId: ID!
     studentIds: [ID!]
 }
 
@@ -87,6 +87,10 @@ type Query {
     findAllUsers: [UserDTO]
 
     groupById(id: ID!): GroupDTO
+    findAllGroupsById(id: [ID!]!): [GroupDTO]
+    findAllGroupsByNameIn(names: [String!]!): [GroupDTO!]!
+    findAllGroupByCoordinator(coordinator_id: ID!): [GroupDTO!]!
+    findAllGroupsByStudentId(student_id: ID!): [GroupDTO!]
     findAllGroups: [GroupDTO]
 
     projectById(id: ID!): Project
@@ -98,7 +102,8 @@ type Mutation {
     updateUser(input: UpdateUserInput!): UserDTO!
     deleteUser(id: ID!): Boolean!
 
-    createGroup(input: CreateGroupInput!): GroupDTO
+    saveGroup(input: CreateGroupInput!): GroupDTO!
+
     createProject(input: CreateProjectInput!): Project
     # Adicione outras mutações conforme necessário (update, delete)
 }

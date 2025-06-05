@@ -6,15 +6,15 @@ import java.util.UUID;
 public class CreateGroupInput {
     public String name;
     public boolean availableForProjects;
-    public UUID coordinatorId;
-    public List<UUID> studentIds;
+    public UUID coordinator;
+    public List<UUID> students;
 
     public CreateGroupInput() {}
-    public CreateGroupInput(String name, boolean availableForProjects, UUID coordinatorId, List<UUID> studentIds) {
+    public CreateGroupInput(String name, boolean availableForProjects, UUID coordinator, List<UUID> students) {
         this.name = name;
         this.availableForProjects = availableForProjects;
-        this.coordinatorId = coordinatorId;
-        this.studentIds = studentIds;
+        this.coordinator = coordinator;
+        this.students = students;
     }
 
     public String getName() {
@@ -33,19 +33,19 @@ public class CreateGroupInput {
         this.availableForProjects = availableForProjects;
     }
 
-    public UUID getCoordinatorId() {
-        return coordinatorId;
+    public UUID getCoordinator() {
+        return coordinator;
     }
 
-    public void setCoordinatorId(UUID coordinatorId) {
-        this.coordinatorId = coordinatorId;
+    public void setCoordinator(UUID coordinator) {
+        this.coordinator = coordinator;
     }
 
-    public List<UUID> getStudentIds() {
-        return studentIds;
+    public List<UUID> getStudents() {
+        return students;
     }
 
-    public void setStudentIds(List<UUID> studentIds) {
-        this.studentIds = studentIds;
+    public void setStudents(List<UUID> students) {
+        this.students = students;
     }
 }

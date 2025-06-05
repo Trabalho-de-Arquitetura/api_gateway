@@ -17,20 +17,17 @@ import org.springframework.graphql.client.HttpGraphQlClient;
 import org.springframework.graphql.execution.RuntimeWiringConfigurer;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import java.time.LocalDate; // Mantenha seus scalars como estavam
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Locale;
 import java.util.UUID;
-import graphql.GraphQLContext; // Para o scalar de Date
-import graphql.execution.CoercedVariables; // Para o scalar de Date
+import graphql.GraphQLContext;
+import graphql.execution.CoercedVariables;
 
 @Configuration
 public class GraphQLClientConfig {
 
-    // NÃO precisamos mais do @Bean @LoadBalanced public WebClient.Builder loadBalancedWebClientBuilder()
-
-    // Injetamos o ReactorLoadBalancerExchangeFilterFunction fornecido pelo Spring Cloud
     private final ReactorLoadBalancerExchangeFilterFunction lbFunction;
 
     public GraphQLClientConfig(ReactorLoadBalancerExchangeFilterFunction lbFunction) {
@@ -74,7 +71,6 @@ public class GraphQLClientConfig {
         return HttpGraphQlClient.builder(webClient).url(baseUrl+"/graphql").build();
     }
 
-    // Seu bean para o scalar UUID (se você o tiver e quiser mantê-lo)
     @Bean
     public GraphQLScalarType uuidScalar() {
         Coercing<UUID, String> uuidCoercing = new Coercing<UUID, String>() {
@@ -111,14 +107,12 @@ public class GraphQLClientConfig {
         };
 
         return GraphQLScalarType.newScalar()
-                .name("UUID") // Deve corresponder ao nome no seu schema do gateway
+                .name("UUID")
                 .description("Java UUID Scalar")
                 .coercing(uuidCoercing)
                 .build();
     }
 
-
-    // Seu bean para o scalar Date
     @Bean
     public GraphQLScalarType dateScalar() {
         return GraphQLScalarType.newScalar()
@@ -165,7 +159,7 @@ public class GraphQLClientConfig {
     @Bean
     public RuntimeWiringConfigurer runtimeWiringConfigurer(GraphQLScalarType uuidScalar, GraphQLScalarType dateScalar) {
         return wiringBuilder -> wiringBuilder
-                .scalar(uuidScalar) // Registra o scalar UUID
-                .scalar(dateScalar); // Registra o scalar Date
+                .scalar(uuidScalar)
+                .scalar(dateScalar);
     }
 }
