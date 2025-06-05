@@ -53,20 +53,24 @@ public class GroupGatewayController {
     }
 
     @QueryMapping
-    public Flux<Group> allGroups() {
+    public Flux<Group> findAllGroups() {
         String document = """
             query AllGroups {
-                allGroups {
+                findAllGroups {
                     id
                     name
                     availableForProjects
-                    coordinator { id }
-                    students { id }
+                    coordinator {
+                      id
+                    }
+                    students {
+                      id
+                    }
                 }
             }
         """;
         return groupsClient.document(document)
-                .retrieve("allGroups")
+                .retrieve("findAllGroups")
                 .toEntityList(Group.class)
                 .flatMapMany(Flux::fromIterable);
     }
@@ -135,19 +139,19 @@ public class GroupGatewayController {
     @MutationMapping
     public Mono<Group> createGroup(@Argument CreateGroupInput input) {
         String document = """
-            mutation CreateGroup($input: CreateGroupInput!) {
-                createGroup(input: $input) {
+            mutation SaveGroup($input: CreateGroupInput!) {
+                saveGroup(input: $input) {
                     id
                     name
                     availableForProjects
-                    coordinator { id } # Retorna ID para ser resolvido depois
-                    students { id }    # Retorna IDs para serem resolvidos depois
+                    coordinator { id }
+                    students { id }
                 }
             }
         """;
         return groupsClient.document(document)
                 .variable("input", input)
-                .retrieve("createGroup")
+                .retrieve("saveGroup")
                 .toEntity(Group.class);
     }
 }

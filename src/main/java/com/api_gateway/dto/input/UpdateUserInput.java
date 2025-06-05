@@ -2,19 +2,29 @@ package com.api_gateway.dto.input;
 
 import com.api_gateway.dto.type.UserRole;
 
-public class CreateUserInput {
+import java.util.UUID;
+
+public class UpdateUserInput {
+    public UUID id;
     public String name;
     public String email;
-    public String password;
     public String affiliatedSchool;
     public UserRole role;
 
-    public CreateUserInput(String name, String email, String password, String affiliatedSchool, UserRole role) {
+    public UpdateUserInput(UUID id, String name, String email, String affiliatedSchool, UserRole role) {
+        this.id = id;
         this.name = name;
         this.email = email;
-        this.password = password;
         this.affiliatedSchool = affiliatedSchool;
         this.role = role;
+    }
+
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
     }
 
     public String getName() {
@@ -31,14 +41,6 @@ public class CreateUserInput {
 
     public void setEmail(String email) {
         this.email = email;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
     }
 
     public String getAffiliatedSchool() {

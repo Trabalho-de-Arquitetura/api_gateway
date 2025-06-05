@@ -2,6 +2,8 @@ package com.api_gateway.controller;
 
 import com.api_gateway.dto.User;
 import com.api_gateway.dto.input.CreateUserInput;
+import com.api_gateway.dto.input.UpdateUserInput;
+import com.api_gateway.dto.type.UserRole;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.graphql.client.HttpGraphQlClient;
 import org.springframework.graphql.data.method.annotation.Argument;
@@ -24,14 +26,15 @@ public class UserGatewayController {
     }
 
     @QueryMapping
-    public Mono<User> userById(@Argument UUID id) {
+    public Mono<User> findUserById(@Argument UUID id) {
         // A query que será enviada para o users-service
         String document = """
-            query UserById($id: ID!) {
-                userById(id: $id) {
+            query FindUserById($id: ID!) {
+                findUserById(id: $id) {
                     id
                     name
                     email
+                    password
                     affiliatedSchool
                     role
                 }
@@ -39,53 +42,100 @@ public class UserGatewayController {
         """;
         return usersClient.document(document)
                 .variable("id", id)
-                .retrieve("userById")
+                .retrieve("findUserById")
                 .toEntity(User.class);
     }
 
     @QueryMapping
-    public Mono<User> userByEmail(@Argument String email) {
+    public Mono<User> findUserByEmail(@Argument String email) {
         String document = """
-            query UserByEmail($email: String!) {
-                userByEmail(email: $email) {
-                    id name email affiliatedSchool role
+            query FindUserByEmail($email: String!) {
+                findUserByEmail(email: $email) {
+                    id name email password affiliatedSchool role
                 }
             }
         """;
         return usersClient.document(document)
                 .variable("email", email)
-                .retrieve("userByEmail")
+                .retrieve("findUserByEmail")
                 .toEntity(User.class);
     }
 
     @QueryMapping
-    public Flux<User> allUsers() { // Use Flux para listas
+    public Flux<User> findUsersByRole(@Argument UserRole role) {
         String document = """
-            query AllUsers {
-                allUsers {
-                    id name email affiliatedSchool role
+            query FindUsersByRole($role: UserRole!) {
+                findUsersByRole(role: $role) {
+                    id name email password affiliatedSchool role
+                }
+            }
+        """;
+
+        return usersClient.document(document)
+                .variable("role", role)
+                .retrieve("findUsersByRole")
+                .toEntityList(User.class)
+                .flatMapMany(Flux::fromIterable);
+    }
+
+    @QueryMapping
+    public Flux<User> findAllUsers() { // Use Flux para listas
+        String document = """
+            query FindAllUsers {
+                findAllUsers {
+                    id name email password affiliatedSchool role
                 }
             }
         """;
         return usersClient.document(document)
-                .retrieve("allUsers")
+                .retrieve("findAllUsers")
                 .toEntityList(User.class) // Converte para lista
                 .flatMapMany(Flux::fromIterable); // Converte Mono<List<User>> para Flux<User>
     }
 
     @MutationMapping
-    public Mono<User> createUser(@Argument CreateUserInput input) {
+    public Mono<User> saveUser(@Argument CreateUserInput input) {
         String document = """
-            mutation CreateUser($input: CreateUserInput!) {
-                createUser(input: $input) {
-                    id name email affiliatedSchool role
+            mutation SaveUser($input: CreateUserInput!) {
+                saveUser(input: $input) {
+                    id name email password affiliatedSchool role
                 }
             }
         """;
         // O input DTO do gateway deve ser compatível com o input DTO do microsserviço
         return usersClient.document(document)
                 .variable("input", input) // Spring converterá o DTO para um Map se necessário
-                .retrieve("createUser")
+                .retrieve("saveUser")
                 .toEntity(User.class);
+    }
+
+    @MutationMapping
+    public Mono<User> updateUser(@Argument UpdateUserInput input) {
+        String document = """
+                mutation UpdateUser($input: UpdateUserInput!) {
+                    updateUser(input: $input) {
+                        id name email password affiliatedSchool role
+                    }
+                }
+        """;
+
+        return usersClient.document(document)
+                .variable("input", input)
+                .retrieve("updateUser")
+                .toEntity(User.class);
+    }
+
+    @MutationMapping
+    public Mono<Boolean> deleteUser(@Argument UUID id) {
+        String document = """
+            mutation DeleteUser($id: ID!) {
+                deleteUser(id: $id)
+            }
+        """;
+
+        return usersClient.document(document)
+                .variable("id", id)
+                .retrieve("deleteUser")
+                .toEntity(Boolean.class);
     }
 }

@@ -8,14 +8,16 @@ public class User {
     private UUID id;
     private String name;
     private String email;
+    private String password;
     private String affiliatedSchool;
     private UserRole role;
 
     public User() {}
-    public User(UUID id, String name, String email, String affiliatedSchool, UserRole role) {
+    public User(UUID id, String name, String email, String password, String affiliatedSchool, UserRole role) {
         this.id = id;
         this.name = name;
         this.email = email;
+        this.password = password;
         this.affiliatedSchool = affiliatedSchool;
         this.role = role;
     }
@@ -42,6 +44,14 @@ public class User {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public String getAffiliatedSchool() {

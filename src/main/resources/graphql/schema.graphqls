@@ -6,20 +6,21 @@ enum UserRole {
     STUDENT
 }
 
-type User {
+type UserDTO {
     id: ID
     name: String
-    email: String!
-    affiliatedSchool: String!
-    role: UserRole!
+    email: String
+    password: String
+    affiliatedSchool: String
+    role: UserRole
 }
 
-type Group {
+type GroupDTO {
     id: ID
-    name: String!
-    availableForProjects: Boolean!
-    coordinator: User!
-    students: [User!]
+    name: String
+    availableForProjects: Boolean
+    coordinator: UserDTO
+    students: [UserDTO]
     # Se quiser expor projetos de um grupo:
     # projects: [Project!]
 }
@@ -40,16 +41,25 @@ type Project {
     targetAudience: String!
     expectedStartDate: Date!
     status: ProjectStatus!
-    requester: User!
-    group: Group
+    requester: UserDTO!
+    group: GroupDTO
 }
 
 # --- Inputs para Mutations (espelham os inputs dos microsserviços) ---
 input CreateUserInput {
     name: String!
     email: String!
+    password: String!
     affiliatedSchool: String!
     role: UserRole!
+}
+
+input UpdateUserInput {
+    id: ID!
+    name: String
+    email: String
+    affiliatedSchool: String
+    role: UserRole
 }
 
 input CreateGroupInput {
@@ -71,20 +81,24 @@ input CreateProjectInput {
 }
 
 type Query {
-    userById(id: ID!): User
-    userByEmail(email: String!): User
-    allUsers: [User]
+    findUserById(id: ID!): UserDTO
+    findUserByEmail(email: String!): UserDTO
+    findUsersByRole(role: UserRole!): [UserDTO]
+    findAllUsers: [UserDTO]
 
-    groupById(id: ID!): Group
-    allGroups: [Group]
+    groupById(id: ID!): GroupDTO
+    findAllGroups: [GroupDTO]
 
     projectById(id: ID!): Project
     allProjects: [Project]
 }
 
 type Mutation {
-    createUser(input: CreateUserInput!): User
-    createGroup(input: CreateGroupInput!): Group
+    saveUser(input: CreateUserInput!): UserDTO!
+    updateUser(input: UpdateUserInput!): UserDTO!
+    deleteUser(id: ID!): Boolean!
+
+    createGroup(input: CreateGroupInput!): GroupDTO
     createProject(input: CreateProjectInput!): Project
     # Adicione outras mutações conforme necessário (update, delete)
 }
