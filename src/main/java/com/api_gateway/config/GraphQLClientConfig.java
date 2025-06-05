@@ -6,8 +6,11 @@ import graphql.schema.CoercingParseLiteralException;
 import graphql.schema.CoercingParseValueException;
 import graphql.schema.CoercingSerializeException;
 import graphql.schema.GraphQLScalarType;
+import org.apache.http.HttpHeaders;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cloud.client.loadbalancer.LoadBalanced; // << IMPORTANTE: Adicionar este import
+import org.springframework.cloud.client.loadbalancer.LoadBalanced;
+import org.springframework.cloud.client.loadbalancer.reactive.ReactorLoadBalancerExchangeFilterFunction;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.graphql.client.HttpGraphQlClient;
@@ -25,37 +28,50 @@ import graphql.execution.CoercedVariables; // Para o scalar de Date
 @Configuration
 public class GraphQLClientConfig {
 
-    // 1. Defina um bean para WebClient.Builder que seja LoadBalanced
-    @Bean
-    @LoadBalanced // Esta anotação habilita o load balancing
-    public WebClient.Builder loadBalancedWebClientBuilder() {
-        return WebClient.builder();
+    // NÃO precisamos mais do @Bean @LoadBalanced public WebClient.Builder loadBalancedWebClientBuilder()
+
+    // Injetamos o ReactorLoadBalancerExchangeFilterFunction fornecido pelo Spring Cloud
+    private final ReactorLoadBalancerExchangeFilterFunction lbFunction;
+
+    public GraphQLClientConfig(ReactorLoadBalancerExchangeFilterFunction lbFunction) {
+        this.lbFunction = lbFunction;
     }
 
-    // 2. Injete o WebClient.Builder @LoadBalanced nos seus beans HttpGraphQlClient
-    // Spring irá injetar o bean 'loadBalancedWebClientBuilder' definido acima.
     @Bean
     public HttpGraphQlClient usersGraphQlClient(
-            @Value("${app.service.users.uri}") String uri,
-            @LoadBalanced WebClient.Builder webClientBuilder) { // A injeção do builder load balanced
-        WebClient webClient = webClientBuilder.baseUrl(uri).build();
-        return HttpGraphQlClient.builder(webClient).build();
+            @Value("${app.service.users.baseurl}") String baseUrl, // Ex: http://users-service
+            WebClient.Builder webClientBuilder) { // Injeta um WebClient.Builder padrão
+        WebClient webClient = webClientBuilder
+                .baseUrl(baseUrl) // Define a URL base (sem /graphql)
+                .filter(lbFunction) // Aplica o filtro de load balancing
+                .defaultHeader(HttpHeaders.CONTENT_TYPE, "application/json")
+                .build();
+        // HttpGraphQlClient usará esta WebClient; ele adicionará /graphql por padrão ao fazer a requisição
+        return HttpGraphQlClient.builder(webClient).url(baseUrl+"/graphql").build();
     }
 
     @Bean
     public HttpGraphQlClient groupsGraphQlClient(
-            @Value("${app.service.groups.uri}") String uri,
-            @LoadBalanced WebClient.Builder webClientBuilder) {
-        WebClient webClient = webClientBuilder.baseUrl(uri).build();
-        return HttpGraphQlClient.builder(webClient).build();
+            @Value("${app.service.groups.baseurl}") String baseUrl,
+            WebClient.Builder webClientBuilder) {
+        WebClient webClient = webClientBuilder
+                .baseUrl(baseUrl)
+                .filter(lbFunction)
+                .defaultHeader(HttpHeaders.CONTENT_TYPE, "application/json")
+                .build();
+        return HttpGraphQlClient.builder(webClient).url(baseUrl+"/graphql").build();
     }
 
     @Bean
     public HttpGraphQlClient projectsGraphQlClient(
-            @Value("${app.service.projects.uri}") String uri,
-            @LoadBalanced WebClient.Builder webClientBuilder) {
-        WebClient webClient = webClientBuilder.baseUrl(uri).build();
-        return HttpGraphQlClient.builder(webClient).build();
+            @Value("${app.service.projects.baseurl}") String baseUrl,
+            WebClient.Builder webClientBuilder) {
+        WebClient webClient = webClientBuilder
+                .baseUrl(baseUrl)
+                .filter(lbFunction)
+                .defaultHeader(HttpHeaders.CONTENT_TYPE, "application/json")
+                .build();
+        return HttpGraphQlClient.builder(webClient).url(baseUrl+"/graphql").build();
     }
 
     // Seu bean para o scalar UUID (se você o tiver e quiser mantê-lo)

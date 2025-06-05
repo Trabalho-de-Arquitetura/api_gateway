@@ -7,7 +7,7 @@ enum UserRole {
 }
 
 type User {
-    id: ID!
+    id: ID
     name: String
     email: String!
     affiliatedSchool: String!
@@ -15,7 +15,7 @@ type User {
 }
 
 type Group {
-    id: ID!
+    id: ID
     name: String!
     availableForProjects: Boolean!
     coordinator: User!
@@ -33,7 +33,7 @@ enum ProjectStatus {
 }
 
 type Project {
-    id: ID!
+    id: ID
     name: String!
     objective: String!
     summaryScope: String!

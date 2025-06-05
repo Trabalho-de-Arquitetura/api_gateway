@@ -83,14 +83,18 @@ public class GroupGatewayController {
         UUID coordinatorId = group.getCoordinatorId().getId();
 
         String userDocument = """
-            query UserById($userId: ID!) {
-                userById(id: $userId) {
-                    id name email affiliatedSchool role
+            query UserById($id: ID!) {
+                userById(id: $id) {
+                    id
+                    name
+                    email
+                    affiliatedSchool
+                    role
                 }
             }
         """;
         return usersClient.document(userDocument)
-                .variable("userId", coordinatorId)
+                .variable("id", coordinatorId)
                 .retrieve("userById")
                 .toEntity(User.class);
     }
@@ -107,20 +111,21 @@ public class GroupGatewayController {
 
         if (studentIds.isEmpty()) return Flux.empty();
 
-        // Para buscar múltiplos usuários, podemos fazer N chamadas (ineficiente)
-        // ou o users-service precisa de uma query que aceite uma lista de IDs.
-        // Exemplo de N chamadas (para simplicidade, não ideal para produção):
         return Flux.fromIterable(studentIds)
                 .flatMap(studentId -> {
                     String userDocument = """
-                    query UserById($userId: ID!) {
-                        userById(id: $userId) {
-                            id name email affiliatedSchool role
+                    query UserById($id: ID!) {
+                        userById(id: $id) {
+                            id
+                            name
+                            email
+                            affiliatedSchool
+                            role
                         }
                     }
                 """;
                     return usersClient.document(userDocument)
-                            .variable("userId", studentId)
+                            .variable("id", studentId)
                             .retrieve("userById")
                             .toEntity(User.class);
                 });
