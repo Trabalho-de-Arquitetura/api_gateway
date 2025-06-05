@@ -1,4 +1,4 @@
-package com.api_gateway.dto.input;
+package com.api_gateway.dto.input.group;
 
 import java.util.List;
 import java.util.UUID;
@@ -6,15 +6,15 @@ import java.util.UUID;
 public class CreateGroupInput {
     public String name;
     public boolean availableForProjects;
-    public UUID coordinator;
-    public List<UUID> students;
+    public UUID coordinatorId;
+    public List<UUID> studentIds;
 
     public CreateGroupInput() {}
-    public CreateGroupInput(String name, boolean availableForProjects, UUID coordinator, List<UUID> students) {
+    public CreateGroupInput(String name, boolean availableForProjects, UUID coordinatorId, List<UUID> studentIds) {
         this.name = name;
         this.availableForProjects = availableForProjects;
-        this.coordinator = coordinator;
-        this.students = students;
+        this.coordinatorId = coordinatorId;
+        this.studentIds = studentIds;
     }
 
     public String getName() {
@@ -33,19 +33,19 @@ public class CreateGroupInput {
         this.availableForProjects = availableForProjects;
     }
 
-    public UUID getCoordinator() {
-        return coordinator;
+    public UUID getCoordinatorId() {
+        return coordinatorId;
     }
 
-    public void setCoordinator(UUID coordinator) {
-        this.coordinator = coordinator;
+    public void setCoordinatorId(UUID coordinatorId) {
+        this.coordinatorId = coordinatorId;
     }
 
-    public List<UUID> getStudents() {
-        return students;
+    public List<UUID> getStudentIds() {
+        return studentIds;
     }
 
-    public void setStudents(List<UUID> students) {
-        this.students = students;
+    public void setStudentIds(List<UUID> studentIds) {
+        this.studentIds = studentIds;
     }
 }

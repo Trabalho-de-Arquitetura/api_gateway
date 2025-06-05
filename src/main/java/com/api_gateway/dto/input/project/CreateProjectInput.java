@@ -1,4 +1,4 @@
-package com.api_gateway.dto.input;
+package com.api_gateway.dto.input.project;
 
 import com.api_gateway.dto.type.ProjectStatus;
 

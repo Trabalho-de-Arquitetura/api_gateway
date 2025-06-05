@@ -2,7 +2,8 @@ package com.api_gateway.controller;
 
 import com.api_gateway.dto.Group;
 import com.api_gateway.dto.User;
-import com.api_gateway.dto.input.CreateGroupInput;
+import com.api_gateway.dto.input.group.CreateGroupInput;
+import com.api_gateway.dto.input.group.UpdateGroupInput;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.graphql.client.HttpGraphQlClient;
@@ -16,7 +17,6 @@ import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Controller
 public class GroupGatewayController {
@@ -214,14 +214,39 @@ public class GroupGatewayController {
                     id
                     name
                     availableForProjects
-                    coordinator { id }
-                    students { id }
+                    coordinator {
+                        id
+                    }
+                    students {
+                        id
+                    }
                 }
-            }
-        """;
+            }""";
         return groupsClient.document(document)
                 .variable("input", input)
                 .retrieve("saveGroup")
+                .toEntity(Group.class);
+    }
+
+    @MutationMapping
+    public Mono<Group> updateGroup(@Argument UpdateGroupInput input) {
+        String document = """
+            mutation UpdateGroup($input: UpdateGroupInput!) {
+                updateGroup(input: $input) {
+                    id
+                    name
+                    availableForProjects
+                    coordinator {
+                        id
+                    }
+                    students {
+                        id
+                    }
+                }
+            }""";
+        return groupsClient.document(document)
+                .variable("input", input)
+                .retrieve("updateGroup")
                 .toEntity(Group.class);
     }
 }

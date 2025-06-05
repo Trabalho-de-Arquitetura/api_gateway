@@ -3,7 +3,7 @@ package com.api_gateway.controller;
 import com.api_gateway.dto.Group;
 import com.api_gateway.dto.Project;
 import com.api_gateway.dto.User;
-import com.api_gateway.dto.input.CreateProjectInput;
+import com.api_gateway.dto.input.project.CreateProjectInput;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.graphql.client.HttpGraphQlClient;
@@ -15,9 +15,7 @@ import org.springframework.stereotype.Controller;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Controller
 public class ProjectGatewayController {

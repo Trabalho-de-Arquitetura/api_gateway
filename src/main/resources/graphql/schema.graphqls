@@ -33,15 +33,15 @@ enum ProjectStatus {
     FINISHED
 }
 
-type Project {
+type ProjectDTO {
     id: ID
-    name: String!
-    objective: String!
-    summaryScope: String!
-    targetAudience: String!
-    expectedStartDate: Date!
-    status: ProjectStatus!
-    requester: UserDTO!
+    name: String
+    objective: String
+    summaryScope: String
+    targetAudience: String
+    expectedStartDate: Date
+    status: ProjectStatus
+    requester: UserDTO
     group: GroupDTO
 }
 
@@ -80,6 +80,14 @@ input CreateProjectInput {
     groupId: ID
 }
 
+input UpdateGroupInput {
+    id: ID!
+    name: String
+    availableForProjects: Boolean
+    coordinatorId: ID
+    studentIds: [ID!]
+}
+
 type Query {
     findUserById(id: ID!): UserDTO
     findUserByEmail(email: String!): UserDTO
@@ -93,8 +101,8 @@ type Query {
     findAllGroupsByStudentId(student_id: ID!): [GroupDTO!]
     findAllGroups: [GroupDTO]
 
-    projectById(id: ID!): Project
-    allProjects: [Project]
+    projectById(id: ID!): ProjectDTO
+    findAllProjects: [ProjectDTO!]
 }
 
 type Mutation {
@@ -103,7 +111,9 @@ type Mutation {
     deleteUser(id: ID!): Boolean!
 
     saveGroup(input: CreateGroupInput!): GroupDTO!
+    updateGroup(input: UpdateGroupInput!): GroupDTO!
+    deleteGroup(id: ID!): GroupDTO!
 
-    createProject(input: CreateProjectInput!): Project
+    createProject(input: CreateProjectInput!): ProjectDTO!
     # Adicione outras mutações conforme necessário (update, delete)
 }

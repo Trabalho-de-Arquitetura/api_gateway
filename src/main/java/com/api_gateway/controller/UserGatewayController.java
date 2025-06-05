@@ -1,8 +1,8 @@
 package com.api_gateway.controller;
 
 import com.api_gateway.dto.User;
-import com.api_gateway.dto.input.CreateUserInput;
-import com.api_gateway.dto.input.UpdateUserInput;
+import com.api_gateway.dto.input.user.CreateUserInput;
+import com.api_gateway.dto.input.user.UpdateUserInput;
 import com.api_gateway.dto.type.UserRole;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.graphql.client.HttpGraphQlClient;
